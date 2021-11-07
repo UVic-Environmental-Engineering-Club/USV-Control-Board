@@ -6,7 +6,7 @@ xTaskHandle motorControl_task;
 xTaskHandle GPS_task;
 xTaskHandle accelerometer_task;
 
-void rtosInit(void)
+void RTOSInit(void)
 {
     xTaskCreatePinnedToCore(UART_PRIVATETASK, "UART", 10000, NULL, 1, &UART_task, 1);
     xTaskCreatePinnedToCore(I2C_PRIVATETASK, "I2C", 10000, NULL, 1, &I2C_task, 1);
@@ -45,7 +45,7 @@ void I2C_PRIVATETASK(void* params)
     }
 }
 
-void UART_PRIVaccelerometer_PRIVATETASKATETASK(void* params)
+void accelerometer_PRIVATETASK(void* params)
 {
     TickType_t lastRunTime;
     TickType_t runPeriod = ACCEL_TASK_RUN_PERIOD / portTICK_PERIOD_MS;

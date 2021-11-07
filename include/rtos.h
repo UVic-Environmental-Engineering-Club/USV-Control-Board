@@ -20,7 +20,7 @@ extern xTaskHandle motorControl_task;
 extern xTaskHandle GPS_task;
 extern xTaskHandle accelerometer_task;
 
-void rtosInit(void);
+void RTOSInit(void);
 
 
 /**
