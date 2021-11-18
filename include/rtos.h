@@ -13,12 +13,14 @@
 #define MOTOR_TASK_RUN_PERIOD 50
 #define GPS_TASK_RUN_PERIOD 50
 #define ACCEL_TASK_RUN_PERIOD 50
+#define COMPASS_TASK_RUN_PERIOD 
 
 extern xTaskHandle UART_task;
 extern xTaskHandle I2C_task;
 extern xTaskHandle motorControl_task;
 extern xTaskHandle GPS_task;
 extern xTaskHandle accelerometer_task;
+extern xTaskHandle compass_task;
 
 void RTOSInit(void);
 
@@ -35,6 +37,7 @@ void I2C_PRIVATETASK(void* params);
 void motorControl_PRIVATETASK(void* params);
 void GPS_PRIVATETASK(void* params);
 void accelerometer_PRIVATETASK(void* params);
+void compass_PRIVATETASK(void* params);
 
 
 #endif
