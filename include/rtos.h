@@ -13,7 +13,7 @@
 #define MOTOR_TASK_RUN_PERIOD 50
 #define GPS_TASK_RUN_PERIOD 50
 #define ACCEL_TASK_RUN_PERIOD 50
-#define COMPASS_TASK_RUN_PERIOD 
+#define COMPASS_TASK_RUN_PERIOD 50
 
 extern xTaskHandle UART_task;
 extern xTaskHandle I2C_task;

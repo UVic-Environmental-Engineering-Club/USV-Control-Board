@@ -91,11 +91,7 @@ typedef struct {
 typedef enum {
     STATEMENT_UNKNOWN = 0, /*!< Unknown statement */
     STATEMENT_GGA,         /*!< GGA */
-    STATEMENT_GSA,         /*!< GSA */
-    STATEMENT_RMC,         /*!< RMC */
-    STATEMENT_GSV,         /*!< GSV */
     STATEMENT_GLL,         /*!< GLL */
-    STATEMENT_VTG          /*!< VTG */
 } nmea_statement_t;
 
 /**
@@ -112,15 +108,10 @@ typedef struct {
     gps_fix_mode_t fix_mode;                                       /*!< Fix mode */
     uint8_t sats_id_in_use[GPS_MAX_SATELLITES_IN_USE];             /*!< ID list of satellite in use */
     float dop_h;                                                   /*!< Horizontal dilution of precision */
-    float dop_p;                                                   /*!< Position dilution of precision  */
-    float dop_v;                                                   /*!< Vertical dilution of precision  */
     uint8_t sats_in_view;                                          /*!< Number of satellites in view */
     gps_satellite_t sats_desc_in_view[GPS_MAX_SATELLITES_IN_VIEW]; /*!< Information of satellites in view */
     gps_date_t date;                                               /*!< Fix date */
     bool valid;                                                    /*!< GPS validity */
-    float speed;                                                   /*!< Ground speed, unit: m/s */
-    float cog;                                                     /*!< Course over ground */
-    float variation;                                               /*!< Magnetic variation */
 } gps_t;
 
 /**
