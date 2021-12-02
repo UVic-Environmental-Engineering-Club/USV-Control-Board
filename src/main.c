@@ -3,5 +3,9 @@
 
 void app_main() 
 {
-RTOSInit();
+
+
+
+rtosInit();
+
 }
