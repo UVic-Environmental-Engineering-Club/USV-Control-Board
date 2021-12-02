@@ -6,6 +6,6 @@ void app_main()
 
 
 
-rtosInit();
+RTOSInit();
 
 }
