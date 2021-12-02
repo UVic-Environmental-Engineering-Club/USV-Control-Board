@@ -68,11 +68,14 @@ void GPS_PRIVATETASK(void* params)
     TickType_t runPeriod = GPS_TASK_RUN_PERIOD / portTICK_PERIOD_MS;
 
     lastRunTime = xTaskGetTickCount();
-
+    /* NMEA parser configuration */
+    nmea_parser_config_t config = NMEA_PARSER_CONFIG_DEFAULT();
+    /* init NMEA parser library */
+    nmea_parser_handle_t nmea_hdl = nmea_parser_init(&config);
     while(1)
     {
         vTaskDelayUntil(&lastRunTime, runPeriod);
-        GPS_run();
+        GPS_run(nmea_hdl);
     }
 }
 
@@ -82,11 +85,12 @@ void compass_PRIVATETASK(void* params)
     TickType_t runPeriod = COMPASS_TASK_RUN_PERIOD / portTICK_PERIOD_MS;
 
     lastRunTime = xTaskGetTickCount();
-
+    i2c_cmd_handle_t cmdhandle = compass_config_run();
+    
     while(1)
     {
         vTaskDelayUntil(&lastRunTime, runPeriod);
-        compass_run();
+        compass_run(cmdhandle);
     }
 }
 

@@ -511,23 +511,6 @@ err_gps:
 }
 
 /**
- * @brief Deinit NMEA Parser
- *
- * @param nmea_hdl handle of NMEA parser
- * @return esp_err_t ESP_OK on success,ESP_FAIL on error
- */
-esp_err_t nmea_parser_deinit(nmea_parser_handle_t nmea_hdl)
-{
-    esp_gps_t *esp_gps = (esp_gps_t *)nmea_hdl;
-    vTaskDelete(esp_gps->tsk_hdl);
-    esp_event_loop_delete(esp_gps->event_loop_hdl);
-    esp_err_t err = uart_driver_delete(esp_gps->uart_port);
-    free(esp_gps->buffer);
-    free(esp_gps);
-    return err;
-}
-
-/**
  * @brief Add user defined handler for NMEA parser
  *
  * @param nmea_hdl handle of NMEA parser
@@ -544,20 +527,4 @@ esp_err_t nmea_parser_add_handler(nmea_parser_handle_t nmea_hdl, esp_event_handl
     esp_gps_t *esp_gps = (esp_gps_t *)nmea_hdl;
     return esp_event_handler_register_with(esp_gps->event_loop_hdl, ESP_NMEA_EVENT, ESP_EVENT_ANY_ID,
                                            event_handler, handler_args);
-}
-
-/**
- * @brief Remove user defined handler for NMEA parser
- *
- * @param nmea_hdl handle of NMEA parser
- * @param event_handler user defined event handler
- * @return esp_err_t
- *  - ESP_OK: Success
- *  - ESP_ERR_INVALIG_ARG: Invalid combination of event base and event id
- *  - Others: Fail
- */
-esp_err_t nmea_parser_remove_handler(nmea_parser_handle_t nmea_hdl, esp_event_handler_t event_handler)
-{
-    esp_gps_t *esp_gps = (esp_gps_t *)nmea_hdl;
-    return esp_event_handler_unregister_with(esp_gps->event_loop_hdl, ESP_NMEA_EVENT, ESP_EVENT_ANY_ID, event_handler);
 }
