@@ -20,6 +20,10 @@ static char tag[] = "hmc5883l";
 #undef ESP_ERROR_CHECK
 #define ESP_ERROR_CHECK(x)   do { esp_err_t rc = (x); if (rc != ESP_OK) { ESP_LOGE("err", "esp_err_t = %d", rc); assert(0 && #x);} } while(0);
 
+nmea_parser_handle_t nmea_hdl;
+
+void GPSInit(void);
+
 void accelerometer_run(void);
 void GPS_run(nmea_parser_handle_t);
 void compass_run(i2c_cmd_handle_t);

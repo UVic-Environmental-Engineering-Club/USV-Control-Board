@@ -38,6 +38,13 @@ static void gps_event_handler(void *event_handler_arg, esp_event_base_t event_ba
     }
 }
 
+void GPSInit()
+{
+    /* NMEA parser configuration */
+    nmea_parser_config_t config = NMEA_PARSER_CONFIG_DEFAULT();
+    /* init NMEA parser library */
+    nmea_parser_handle_t nmea_hdl = nmea_parser_init(&config);
+}
 
 void accelerometer_run()
 {
@@ -46,12 +53,8 @@ void accelerometer_run()
 
 void GPS_run(nmea_parser_handle_t nmea_hdl)
 {
- 
     /* register event handler for NMEA parser library */
     nmea_parser_add_handler(nmea_hdl, gps_event_handler, NULL);
-
-    vTaskDelay(10000 / portTICK_PERIOD_MS);
- 
 }
 
 void compass_run(i2c_cmd_handle_t cmd)

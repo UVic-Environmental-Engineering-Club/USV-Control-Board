@@ -11,7 +11,7 @@
 #define UART_TASK_RUN_PERIOD 50
 #define I2C_TASK_RUN_PERIOD 50
 #define MOTOR_TASK_RUN_PERIOD 50
-#define GPS_TASK_RUN_PERIOD 50
+#define GPS_TASK_RUN_PERIOD 10000
 #define ACCEL_TASK_RUN_PERIOD 50
 #define COMPASS_TASK_RUN_PERIOD 50
 
@@ -21,6 +21,8 @@ extern xTaskHandle motorControl_task;
 extern xTaskHandle GPS_task;
 extern xTaskHandle accelerometer_task;
 extern xTaskHandle compass_task;
+
+extern nmea_parser_handle_t nmea_hdl;
 
 void RTOSInit(void);
 
