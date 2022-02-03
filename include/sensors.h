@@ -21,6 +21,10 @@
 static char tag[] = "Compass: ";
 static const char *TAG = "GPS: ";
 
+nmea_parser_handle_t nmea_hdl;
+
+void GPSInit(void);
+
 void accelerometer_run(void);
 void GPS_run();
 void compass_run(i2c_cmd_handle_t);

@@ -67,8 +67,9 @@ void GPS_PRIVATETASK(void* params)
 {
     TickType_t lastRunTime;
     TickType_t runPeriod = GPS_TASK_RUN_PERIOD / portTICK_PERIOD_MS;
-
+    
     lastRunTime = xTaskGetTickCount();
+<<<<<<< HEAD
     /* NMEA parser configuration */
     nmea_parser_config_t config = NMEA_PARSER_CONFIG_DEFAULT();
     /* init NMEA parser library */
@@ -76,6 +77,9 @@ void GPS_PRIVATETASK(void* params)
     /* register event handler for NMEA parser library */
     gps_handler_call(nmea_hdl);
     
+=======
+
+>>>>>>> 21d52effd97b3f33f6001b210cd3f0893c3b4c9b
     while(1)
     {
         vTaskDelayUntil(&lastRunTime, runPeriod);

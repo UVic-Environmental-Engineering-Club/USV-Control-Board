@@ -121,6 +121,26 @@ CONFIG_PARTITION_TABLE_MD5=y
 # end of Partition Table
 
 #
+# Example Configuration
+#
+CONFIG_NMEA_PARSER_UART_RXD=5
+CONFIG_NMEA_PARSER_RING_BUFFER_SIZE=1024
+CONFIG_NMEA_PARSER_TASK_STACK_SIZE=2048
+CONFIG_NMEA_PARSER_TASK_PRIORITY=2
+
+#
+# NMEA Statement Support
+#
+
+#
+# At least one statement must be selected
+#
+CONFIG_NMEA_STATEMENT_GGA=y
+CONFIG_NMEA_STATEMENT_GLL=y
+# end of NMEA Statement Support
+# end of Example Configuration
+
+#
 # Compiler options
 #
 CONFIG_COMPILER_OPTIMIZATION_DEFAULT=y
