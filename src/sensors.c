@@ -1,11 +1,16 @@
 #include "sensors.h"
 #include "config.h"
 #include "main.h"
+#include "rtos.h"
 
 
-static const char *TAG = "GPS: ";
-#define TIME_ZONE (-8)   //Canada Time
+
+
 #define YEAR_BASE (2000) //date in GPS starts from 2000
+#define TIME_ZONE (-8)   //Canada Time
+
+
+//Function that describes what program will do when the GPS info is updated by the module
 /**
  * @brief GPS Event Handler
  *
@@ -18,16 +23,19 @@ static void gps_event_handler(void *event_handler_arg, esp_event_base_t event_ba
 {
     gps_t *gps = NULL;
     switch (event_id) {
-    case GPS_UPDATE:
+    case GPS_UPDATE: //Any time a new NMEA statement is received from the module
         gps = (gps_t *)event_data;
         /* print information parsed from GPS statements */
-        ESP_LOGI(TAG, "%d/%d/%d %d:%d:%d => \r\n"
+		if ((gps->tim.hour) + TIME_ZONE < 0)
+			gps->tim.hour = gps->tim.hour + 24;
+
+        ESP_LOGI(TAG, " %d:%d:%d => \r\n"
+				 "\t\t\t\t\t\tsatellites in use   = %d\r\n"
                  "\t\t\t\t\t\tlatitude   = %.05f°N\r\n"
                  "\t\t\t\t\t\tlongitude = %.05f°E\r\n"
                  "\t\t\t\t\t\taltitude   = %.02fm\r\n",
-                 gps->date.year + YEAR_BASE, gps->date.month, gps->date.day,
                  gps->tim.hour + TIME_ZONE, gps->tim.minute, gps->tim.second,
-                 gps->latitude, gps->longitude, gps->altitude);
+                 gps->sats_in_use, gps->latitude, gps->longitude, gps->altitude);
         break;
     case GPS_UNKNOWN:
         /* print unknown statements */
@@ -38,20 +46,19 @@ static void gps_event_handler(void *event_handler_arg, esp_event_base_t event_ba
     }
 }
 
+void gps_handler_call(nmea_parser_handle_t nmea_hdl)
+{
+nmea_parser_add_handler(nmea_hdl, gps_event_handler, NULL);	
+}
 
 void accelerometer_run()
 {
     
 }
 
-void GPS_run(nmea_parser_handle_t nmea_hdl)
-{
- 
-    /* register event handler for NMEA parser library */
-    nmea_parser_add_handler(nmea_hdl, gps_event_handler, NULL);
-
-    vTaskDelay(10000 / portTICK_PERIOD_MS);
- 
+void GPS_run()
+{   
+vTaskDelay(10000 / portTICK_PERIOD_MS);
 }
 
 void compass_run(i2c_cmd_handle_t cmd)

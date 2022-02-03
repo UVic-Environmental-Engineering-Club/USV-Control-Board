@@ -7,6 +7,7 @@
 #include "communications.h"
 #include "motorcontrol.h"
 #include "sensors.h"
+#include "nmea_parser.h"
 
 #define UART_TASK_RUN_PERIOD 50
 #define I2C_TASK_RUN_PERIOD 50
@@ -20,7 +21,7 @@ extern xTaskHandle I2C_task;
 extern xTaskHandle motorControl_task;
 extern xTaskHandle GPS_task;
 extern xTaskHandle accelerometer_task;
-extern xTaskHandle compass_task;
+extern xTaskHandle compass_task; 
 
 void RTOSInit(void);
 

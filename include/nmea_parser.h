@@ -94,6 +94,7 @@ typedef enum {
     STATEMENT_GLL,         /*!< GLL */
 } nmea_statement_t;
 
+//Typedef struct containing info that gets parsed from statement
 /**
  * @brief GPS object
  *
@@ -114,6 +115,7 @@ typedef struct {
     bool valid;                                                    /*!< GPS validity */
 } gps_t;
 
+//Config struct for setting up and initializing UART
 /**
  * @brief Configuration of NMEA Parser
  *
@@ -130,12 +132,14 @@ typedef struct {
     } uart;                           /*!< UART specific configuration */
 } nmea_parser_config_t;
 
+//Declaration of handler
 /**
  * @brief NMEA Parser Handle
  *
  */
 typedef void *nmea_parser_handle_t;
 
+//Default configuration of UART
 /**
  * @brief Default configuration for NMEA Parser
  *
@@ -153,6 +157,7 @@ typedef void *nmea_parser_handle_t;
         }                                  \
     }
 
+//Typedef indicating whether GPS info has been updated, or if an unknown statement detected
 /**
  * @brief NMEA Parser Event ID
  *
@@ -162,6 +167,7 @@ typedef enum {
     GPS_UNKNOWN /*!< Unknown statements detected */
 } nmea_event_id_t;
 
+//Declaration of parser initialization (passing UART config to the program)
 /**
  * @brief Init NMEA Parser
  *
@@ -170,6 +176,7 @@ typedef enum {
  */
 nmea_parser_handle_t nmea_parser_init(const nmea_parser_config_t *config);
 
+//Declaration of handler initialization for NMEA statement interrupts
 /**
  * @brief Add user defined handler for NMEA parser
  *

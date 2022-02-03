@@ -1,4 +1,5 @@
 #include "rtos.h"
+#include "sensors.h"
 
 xTaskHandle UART_task;
 xTaskHandle I2C_task;
@@ -6,6 +7,8 @@ xTaskHandle motorControl_task;
 xTaskHandle GPS_task;
 xTaskHandle accelerometer_task;
 xTaskHandle compass_task;
+
+
 
 void RTOSInit(void)
 {
@@ -17,8 +20,6 @@ void RTOSInit(void)
     xTaskCreatePinnedToCore(GPS_PRIVATETASK, "gps", 10000, NULL, 0, &GPS_task, 0);
     xTaskCreatePinnedToCore(compass_PRIVATETASK, "compass", 10000, NULL, 0, &GPS_task, 0);
 }
-
-
 
 void UART_PRIVATETASK(void* params)
 {
@@ -72,10 +73,13 @@ void GPS_PRIVATETASK(void* params)
     nmea_parser_config_t config = NMEA_PARSER_CONFIG_DEFAULT();
     /* init NMEA parser library */
     nmea_parser_handle_t nmea_hdl = nmea_parser_init(&config);
+    /* register event handler for NMEA parser library */
+    gps_handler_call(nmea_hdl);
+    
     while(1)
     {
         vTaskDelayUntil(&lastRunTime, runPeriod);
-        GPS_run(nmea_hdl);
+        GPS_run();
     }
 }
 
@@ -107,3 +111,4 @@ void motorControl_PRIVATETASK(void* params)
         motor_run();
     }
 }
+
