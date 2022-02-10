@@ -38,7 +38,7 @@ void I2C_PRIVATETASK(void* params);
  * CORE 0 TASKS
  */
 void motorControl_PRIVATETASK(void* params);
-void GPS_PRIVATETASK(void* params);
+void GPS_Init();
 void accelerometer_PRIVATETASK(void* params);
 void compass_PRIVATETASK(void* params);
 

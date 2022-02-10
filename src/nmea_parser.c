@@ -497,13 +497,13 @@ nmea_parser_handle_t nmea_parser_init(const nmea_parser_config_t *config)
         goto err_eloop;
     }
     /* Create NMEA Parser task */
-    BaseType_t err = xTaskCreate(
+    BaseType_t err = xTaskCreatePinnedToCore(
                          nmea_parser_task_entry,
                          "nmea_parser",
                          CONFIG_NMEA_PARSER_TASK_STACK_SIZE,
                          esp_gps,
                          CONFIG_NMEA_PARSER_TASK_PRIORITY,
-                         &esp_gps->tsk_hdl);
+                         &esp_gps->tsk_hdl,0);
     if (err != pdTRUE) {
         ESP_LOGE(GPS_TAG, "create NMEA Parser task failed");
         goto err_task_create;
