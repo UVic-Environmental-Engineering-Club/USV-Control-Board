@@ -7,8 +7,6 @@ i2c_init();
 
 GPSInit();
 
-lidar_init();
-
 RTOSInit();
 
 }

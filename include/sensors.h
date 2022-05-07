@@ -38,7 +38,7 @@ void GPS_run();
 void compass_run(i2c_cmd_handle_t);
 i2c_cmd_handle_t compass_config_run(void);
 void gps_handler_call(nmea_parser_handle_t);
-void lidar_init();
+void lidar_config();
 void lidar_run();
 
 #endif

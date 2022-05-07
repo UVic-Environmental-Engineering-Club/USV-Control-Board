@@ -110,6 +110,7 @@ void lidar_PRIVATETASK(void* params)
     TickType_t runPeriod = COMPASS_TASK_RUN_PERIOD / portTICK_PERIOD_MS;
 
     lastRunTime = xTaskGetTickCount();
+    lidar_config();
     
     while(1)
     {
