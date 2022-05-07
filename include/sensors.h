@@ -26,8 +26,10 @@ nmea_parser_handle_t nmea_hdl;
 
 sensor_t LIDAR1 = {1,0x62,23};
 sensor_t LIDAR2 = {1,0x64,23};
+sensor_t LIDAR3 = {1,0x66,23};
 int lidar1_dist;
 int lidar2_dist;
+int lidar3_dist;
 
 void GPSInit(void);
 
