@@ -9,7 +9,7 @@
 
 #include "i2c.h"
 
-void app_main() 
+/*void app_main() 
 {
     i2c_init();
 
@@ -45,5 +45,6 @@ void app_main()
         printf("%d\n", accelx);
 
         vTaskDelay(500 / portTICK_PERIOD_MS);
-    }
+    } 
 }
+*/

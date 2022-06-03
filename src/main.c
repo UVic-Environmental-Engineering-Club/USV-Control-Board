@@ -4,8 +4,6 @@
 void app_main() 
 {
 
-GPSInit();
-
 RTOSInit();
 
 }
