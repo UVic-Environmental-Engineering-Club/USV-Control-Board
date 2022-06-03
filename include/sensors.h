@@ -12,6 +12,7 @@
 #include <driver/i2c.h>
 #include <math.h>
 #include "sdkconfig.h"
+#include "i2c.h"
 
 #define PIN_SDA 21
 #define PIN_CLK 22
@@ -23,6 +24,13 @@ static const char *TAG = "GPS: ";
 
 nmea_parser_handle_t nmea_hdl;
 
+sensor_t LIDAR1 = {1,0x62,23};
+sensor_t LIDAR2 = {1,0x64,23};
+sensor_t LIDAR3 = {1,0x66,23};
+int lidar1_dist;
+int lidar2_dist;
+int lidar3_dist;
+
 void GPSInit(void);
 
 void accelerometer_run(void);
@@ -30,6 +38,7 @@ void GPS_run();
 void compass_run(i2c_cmd_handle_t);
 i2c_cmd_handle_t compass_config_run(void);
 void gps_handler_call(nmea_parser_handle_t);
-
+void lidar_config();
+void lidar_run();
 
 #endif

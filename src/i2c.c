@@ -6,7 +6,7 @@ esp_err_t i2c_yoink(sensor_t sensor, i2c_register_t i2c_register, byte* data, si
 {
     i2c_cmd_handle_t cmd = i2c_cmd_link_create();
 	i2c_master_start(cmd);
-	i2c_master_write_byte(cmd, (sensor.addr << 1) | I2C_MASTER_WRITE, 0);
+	i2c_master_write_byte(cmd, (sensor.addr << 1) | I2C_MASTER_WRITE, 1);
 	i2c_master_write_byte(cmd, i2c_register, 1);
 	i2c_master_stop(cmd);
 	i2c_master_cmd_begin(I2C_PORT, cmd, 1000 / portTICK_PERIOD_MS);

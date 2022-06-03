@@ -7,6 +7,7 @@ xTaskHandle motorControl_task;
 xTaskHandle GPS_task;
 xTaskHandle accelerometer_task;
 xTaskHandle compass_task;
+xTaskHandle lidar_task;
 
 
 
@@ -17,6 +18,7 @@ void RTOSInit(void)
     xTaskCreatePinnedToCore(accelerometer_PRIVATETASK, "accelerometer", 10000, NULL, 0, &accelerometer_task, 0);
     xTaskCreatePinnedToCore(motorControl_PRIVATETASK, "motor control", 10000, NULL, 0, &motorControl_task, 0);
     xTaskCreatePinnedToCore(compass_PRIVATETASK, "compass", 10000, NULL, 0, &GPS_task, 0);
+    xTaskCreatePinnedToCore(lidar_PRIVATETASK, "lidar", 10000, NULL, 0, &lidar_task, 0);
     GPS_Init();
 }
 
@@ -99,6 +101,21 @@ void compass_PRIVATETASK(void* params)
     {
         vTaskDelayUntil(&lastRunTime, runPeriod);
         compass_run(cmdhandle);
+    }
+}
+
+void lidar_PRIVATETASK(void* params)
+{
+    TickType_t lastRunTime;
+    TickType_t runPeriod = COMPASS_TASK_RUN_PERIOD / portTICK_PERIOD_MS;
+
+    lastRunTime = xTaskGetTickCount();
+    lidar_config();
+    
+    while(1)
+    {
+        vTaskDelayUntil(&lastRunTime, runPeriod);
+        lidar_run();
     }
 }
 

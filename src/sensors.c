@@ -97,3 +97,45 @@ void compass_run(i2c_cmd_handle_t cmd)
 	vTaskDelay(1000/portTICK_PERIOD_MS);
 	
 }
+
+void lidar_run()
+{
+	byte lidar_val1;
+	byte lidar_val2;
+	
+	//LIDAR1 acquisition
+    lidar_val1 = 0x01;
+    lidar_val2 = 0x00;
+    while(lidar_val1 & 0x01 && lidar_val2 != 0x0a){     //will make 10 checks to see if lidar is ready to transmit before timing out. lidar is ready when bit 0 of register 0x01 is 0. If lidar is not connected properly lidar_dist will be very large, and take 5+ seconds to run through
+        i2c_yeet(LIDAR1,0x00,0x04,1);
+        i2c_yoink(LIDAR1,0x01,&lidar_val1,1);
+        lidar_val2++;
+    }
+    i2c_yoink(LIDAR1,0x0F,&lidar_val1,1);
+    i2c_yoink(LIDAR1,0x10,&lidar_val2,1);
+    lidar1_dist = (lidar_val1 << 8) | lidar_val2;
+
+    //LIDAR2 acquisition
+    lidar_val1 = 0x01;
+    lidar_val2 = 0x00;
+    while(lidar_val1 & 0x01 && lidar_val2 != 0x0a){     //will make 10 checks to see if lidar is ready to transmit before timing out. lidar is ready when bit 0 of register 0x01 is 0. If lidar is not connected properly lidar_dist will be very large, and take 5+ seconds to run through
+        i2c_yeet(LIDAR2,0x00,0x04,1);
+        i2c_yoink(LIDAR2,0x01,&lidar_val1,1);
+        lidar_val2++;
+    }
+    i2c_yoink(LIDAR2,0x0F,&lidar_val1,1);
+    i2c_yoink(LIDAR2,0x10,&lidar_val2,1);
+    lidar2_dist = (lidar_val1 << 8) | lidar_val2;
+
+	//LIDAR3 acquisition
+    lidar_val1 = 0x01;
+    lidar_val2 = 0x00;
+    while(lidar_val1 & 0x01 && lidar_val2 != 0x0a){     //will make 10 checks to see if lidar is ready to transmit before timing out. lidar is ready when bit 0 of register 0x01 is 0. If lidar is not connected properly lidar_dist will be very large, and take 5+ seconds to run through
+        i2c_yeet(LIDAR3,0x00,0x04,1);
+        i2c_yoink(LIDAR3,0x01,&lidar_val1,1);
+        lidar_val2++;
+    }
+    i2c_yoink(LIDAR3,0x0F,&lidar_val1,1);
+    i2c_yoink(LIDAR3,0x10,&lidar_val2,1);
+    lidar3_dist = (lidar_val1 << 8) | lidar_val2;
+}
