@@ -100,6 +100,7 @@ void compass_run(i2c_cmd_handle_t cmd)
 
 void lidar_run()
 {
+    lidar_config();
 	byte lidar_val1;
 	byte lidar_val2;
 	
