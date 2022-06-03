@@ -59,6 +59,7 @@ i2c_cmd_handle_t compass_config_run(void)
     return cmd;
 }
 
+
 void lidar_config()
 {
 	i2c_yeet(LIDAR1,0x18,(byte)8,1);                  //switches lidar2's address from default to 0x64 by reading it's 16 bit serial number into registers 0x18 & 0x19 etc.
