@@ -3,8 +3,7 @@
 
 void app_main() 
 {
-
-GPSInit();
+i2c_init();
 
 RTOSInit();
 

@@ -1,11 +1,16 @@
 #include "sensors.h"
 #include "config.h"
 #include "main.h"
+#include "rtos.h"
 
 
-static const char *TAG = "GPS: ";
-#define TIME_ZONE (-8)   //Canada Time
+
+
 #define YEAR_BASE (2000) //date in GPS starts from 2000
+#define TIME_ZONE (-8)   //Canada Time
+
+
+//Function that describes what program will do when the GPS info is updated by the module
 /**
  * @brief GPS Event Handler
  *
@@ -18,16 +23,19 @@ static void gps_event_handler(void *event_handler_arg, esp_event_base_t event_ba
 {
     gps_t *gps = NULL;
     switch (event_id) {
-    case GPS_UPDATE:
+    case GPS_UPDATE: //Any time a new NMEA statement is received from the module
         gps = (gps_t *)event_data;
         /* print information parsed from GPS statements */
-        ESP_LOGI(TAG, "%d/%d/%d %d:%d:%d => \r\n"
+		if ((gps->tim.hour) + TIME_ZONE < 0)
+			gps->tim.hour = gps->tim.hour + 24;
+
+        ESP_LOGI(TAG, " %d:%d:%d => \r\n"
+				 "\t\t\t\t\t\tsatellites in use   = %d\r\n"
                  "\t\t\t\t\t\tlatitude   = %.05f°N\r\n"
                  "\t\t\t\t\t\tlongitude = %.05f°E\r\n"
                  "\t\t\t\t\t\taltitude   = %.02fm\r\n",
-                 gps->date.year + YEAR_BASE, gps->date.month, gps->date.day,
                  gps->tim.hour + TIME_ZONE, gps->tim.minute, gps->tim.second,
-                 gps->latitude, gps->longitude, gps->altitude);
+                 gps->sats_in_use, gps->latitude, gps->longitude, gps->altitude);
         break;
     case GPS_UNKNOWN:
         /* print unknown statements */
@@ -38,12 +46,9 @@ static void gps_event_handler(void *event_handler_arg, esp_event_base_t event_ba
     }
 }
 
-void GPSInit()
+void gps_handler_call(nmea_parser_handle_t nmea_hdl)
 {
-    /* NMEA parser configuration */
-    nmea_parser_config_t config = NMEA_PARSER_CONFIG_DEFAULT();
-    /* init NMEA parser library */
-    nmea_parser_handle_t nmea_hdl = nmea_parser_init(&config);
+nmea_parser_add_handler(nmea_hdl, gps_event_handler, NULL);	
 }
 
 void accelerometer_run()
@@ -51,10 +56,9 @@ void accelerometer_run()
     
 }
 
-void GPS_run(nmea_parser_handle_t nmea_hdl)
-{
-    /* register event handler for NMEA parser library */
-    nmea_parser_add_handler(nmea_hdl, gps_event_handler, NULL);
+void GPS_run()
+{   
+vTaskDelay(10000 / portTICK_PERIOD_MS);
 }
 
 void compass_run(i2c_cmd_handle_t cmd)
@@ -92,4 +96,46 @@ void compass_run(i2c_cmd_handle_t cmd)
 	ESP_LOGE(tag, "angle: %d°, x: %duT, y: %duT, z: %duT", angle, x, y, z);
 	vTaskDelay(1000/portTICK_PERIOD_MS);
 	
+}
+
+void lidar_run()
+{
+	byte lidar_val1;
+	byte lidar_val2;
+	
+	//LIDAR1 acquisition
+    lidar_val1 = 0x01;
+    lidar_val2 = 0x00;
+    while(lidar_val1 & 0x01 && lidar_val2 != 0x0a){     //will make 10 checks to see if lidar is ready to transmit before timing out. lidar is ready when bit 0 of register 0x01 is 0. If lidar is not connected properly lidar_dist will be very large, and take 5+ seconds to run through
+        i2c_yeet(LIDAR1,0x00,0x04,1);
+        i2c_yoink(LIDAR1,0x01,&lidar_val1,1);
+        lidar_val2++;
+    }
+    i2c_yoink(LIDAR1,0x0F,&lidar_val1,1);
+    i2c_yoink(LIDAR1,0x10,&lidar_val2,1);
+    lidar1_dist = (lidar_val1 << 8) | lidar_val2;
+
+    //LIDAR2 acquisition
+    lidar_val1 = 0x01;
+    lidar_val2 = 0x00;
+    while(lidar_val1 & 0x01 && lidar_val2 != 0x0a){     //will make 10 checks to see if lidar is ready to transmit before timing out. lidar is ready when bit 0 of register 0x01 is 0. If lidar is not connected properly lidar_dist will be very large, and take 5+ seconds to run through
+        i2c_yeet(LIDAR2,0x00,0x04,1);
+        i2c_yoink(LIDAR2,0x01,&lidar_val1,1);
+        lidar_val2++;
+    }
+    i2c_yoink(LIDAR2,0x0F,&lidar_val1,1);
+    i2c_yoink(LIDAR2,0x10,&lidar_val2,1);
+    lidar2_dist = (lidar_val1 << 8) | lidar_val2;
+
+	//LIDAR3 acquisition
+    lidar_val1 = 0x01;
+    lidar_val2 = 0x00;
+    while(lidar_val1 & 0x01 && lidar_val2 != 0x0a){     //will make 10 checks to see if lidar is ready to transmit before timing out. lidar is ready when bit 0 of register 0x01 is 0. If lidar is not connected properly lidar_dist will be very large, and take 5+ seconds to run through
+        i2c_yeet(LIDAR3,0x00,0x04,1);
+        i2c_yoink(LIDAR3,0x01,&lidar_val1,1);
+        lidar_val2++;
+    }
+    i2c_yoink(LIDAR3,0x0F,&lidar_val1,1);
+    i2c_yoink(LIDAR3,0x10,&lidar_val2,1);
+    lidar3_dist = (lidar_val1 << 8) | lidar_val2;
 }

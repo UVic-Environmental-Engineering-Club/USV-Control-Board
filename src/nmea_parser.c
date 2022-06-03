@@ -28,6 +28,8 @@
 #define NMEA_PARSER_RUNTIME_BUFFER_SIZE (CONFIG_NMEA_PARSER_RING_BUFFER_SIZE / 2)
 #define NMEA_MAX_STATEMENT_ITEM_LENGTH (16)
 #define NMEA_EVENT_LOOP_QUEUE_SIZE (16)
+#define YEAR_BASE (2000) //date in GPS starts from 2000
+#define TIME_ZONE (-8)   //Canada Time
 
 
 /**
@@ -38,6 +40,7 @@ ESP_EVENT_DEFINE_BASE(ESP_NMEA_EVENT);
 
 static const char *GPS_TAG = "nmea_parser";
 
+//Typedef for GPS Object decoding statements, and other GPS parameters
 /**
  * @brief GPS parser library runtime structure
  *
@@ -61,6 +64,7 @@ typedef struct {
     QueueHandle_t event_queue;                     /*!< UART event queue handle */
 } esp_gps_t;
 
+//Function that parses the latitude and longitude of the item in the statement
 /**
  * @brief parse latitude or longitude
  *              format of latitude in NMEA is ddmm.sss and longitude is dddmm.sss
@@ -76,6 +80,7 @@ static float parse_lat_long(esp_gps_t *esp_gps)
     return ll;
 }
 
+//Function that converts two individual digits to a number (used for utc time)
 /**
  * @brief Converter two continuous numeric character into a uint8_t number
  *
@@ -87,6 +92,7 @@ static inline uint8_t convert_two_digit2number(const char *digit_char)
     return 10 * (digit_char[0] - '0') + (digit_char[1] - '0');
 }
 
+//Use the above function to parse the time from the line, and store
 /**
  * @brief Parse UTC time in GPS statements
  *
@@ -106,8 +112,10 @@ static void parse_utc_time(esp_gps_t *esp_gps)
         }
         esp_gps->parent.tim.thousand = tmp;
     }
+    
 }
 
+//Function that defines what each "item" in the $GGA NMEA string is, and the appropriate parsing function to update values (if statement because this can be configured on/off in menuconfig)
 #if CONFIG_NMEA_STATEMENT_GGA
 /**
  * @brief Parse GGA statements
@@ -158,6 +166,7 @@ static void parse_gga(esp_gps_t *esp_gps)
 }
 #endif
 
+//Function that defines what each "item" in the $GLL NMEA string is, and the appropriate parsing function to update values (if statement because this can be configured on/off in menuconfig)
 #if CONFIG_NMEA_STATEMENT_GLL
 /**
  * @brief Parse GLL statements
@@ -196,6 +205,7 @@ static void parse_gll(esp_gps_t *esp_gps)
 }
 #endif
 
+//Function that parses each "item" in the statement. "Items" are the information contained inbetween two commas in statement
 /**
  * @brief Parse received item
  *
@@ -205,23 +215,23 @@ static void parse_gll(esp_gps_t *esp_gps)
 static esp_err_t parse_item(esp_gps_t *esp_gps)
 {
     esp_err_t err = ESP_OK;
-    /* start of a statement */
+    /* Check if start of a statement */
     if (esp_gps->item_num == 0 && esp_gps->item_str[0] == '$') {
         if (0) {
         }
-#if CONFIG_NMEA_STATEMENT_GGA
-        else if (strstr(esp_gps->item_str, "GGA")) {
-            esp_gps->cur_statement = STATEMENT_GGA;
+#if CONFIG_NMEA_STATEMENT_GGA //Check if $GGA statements are enabled
+        else if (strstr(esp_gps->item_str, "GGA")) { //Check if the current statement was detected to be $GGA via the first item of statement
+            esp_gps->cur_statement = STATEMENT_GGA; //Declare the whole string to be a $GGA statement
         }
 #endif
 #if CONFIG_NMEA_STATEMENT_GLL
-        else if (strstr(esp_gps->item_str, "GLL")) {
-            esp_gps->cur_statement = STATEMENT_GLL;
+        else if (strstr(esp_gps->item_str, "GLL")) { //Check if the current statement was detected to be $GLL via the first item of statement
+            esp_gps->cur_statement = STATEMENT_GLL; //Declare the whole string to be a $GLL statement
         }
 #endif
 
         else {
-            esp_gps->cur_statement = STATEMENT_UNKNOWN;
+            esp_gps->cur_statement = STATEMENT_UNKNOWN; //If not $GGA or $GLL, declare statement to be unknown and exit
         }
         goto out;
     }
@@ -231,22 +241,23 @@ static esp_err_t parse_item(esp_gps_t *esp_gps)
     }
 #if CONFIG_NMEA_STATEMENT_GGA
     else if (esp_gps->cur_statement == STATEMENT_GGA) {
-        parse_gga(esp_gps);
+        parse_gga(esp_gps); //Call the function that parses $GGA, if the current statement is $GGA from above
     }
 #endif
 #if CONFIG_NMEA_STATEMENT_GLL
     else if (esp_gps->cur_statement == STATEMENT_GLL) {
-        parse_gll(esp_gps);
+        parse_gll(esp_gps); //Call the function that parses $GLL, if the current statement is $GLL from above
     }
 #endif
 
     else {
-        err =  ESP_FAIL;
+        err =  ESP_FAIL; //Otherwise, declare an ESP_Fail and return an error
     }
 out:
     return err;
 }
 
+//This function decodes the inbound statements, it tracks position in statement, detects special characters ($ * , and end of line character), and calls the parse item function on each "item" in the statement. Also handles unknown characters in statement
 /**
  * @brief Parse NMEA statements from GPS receiver
  *
@@ -347,6 +358,7 @@ static esp_err_t gps_decode(esp_gps_t *esp_gps, size_t len)
     return ESP_OK;
 }
 
+//This function handles inbound transmission over UART from the GPS. It ensures that the inbound line can be properly decoded, and flushes the buffer when data has been used
 /**
  * @brief Handle when a pattern has been detected by uart
  *
@@ -370,6 +382,7 @@ static void esp_handle_uart_pattern(esp_gps_t *esp_gps)
     }
 }
 
+//Function that checks for specific errors in the buffer from UART transmission. If errors do not occur (break statement), run the defined event loop to decode statements
 /**
  * @brief NMEA Parser Task Entry
  *
@@ -417,6 +430,7 @@ static void nmea_parser_task_entry(void *arg)
     vTaskDelete(NULL);
 }
 
+//Function that initializes the parsing program. Includes memory allocation, configuring UART and installing its drivers, creates the event loop, and creates the task. Much of this is error checking with appropriate fixes when detected
 /**
  * @brief Init NMEA Parser
  *
@@ -483,13 +497,13 @@ nmea_parser_handle_t nmea_parser_init(const nmea_parser_config_t *config)
         goto err_eloop;
     }
     /* Create NMEA Parser task */
-    BaseType_t err = xTaskCreate(
+    BaseType_t err = xTaskCreatePinnedToCore(
                          nmea_parser_task_entry,
                          "nmea_parser",
                          CONFIG_NMEA_PARSER_TASK_STACK_SIZE,
                          esp_gps,
                          CONFIG_NMEA_PARSER_TASK_PRIORITY,
-                         &esp_gps->tsk_hdl);
+                         &esp_gps->tsk_hdl,0);
     if (err != pdTRUE) {
         ESP_LOGE(GPS_TAG, "create NMEA Parser task failed");
         goto err_task_create;
@@ -510,6 +524,7 @@ err_gps:
     return NULL;
 }
 
+//Custom function that takes the parser and returns an event handler. It allows us to pass the defined task in the sensors.c file
 /**
  * @brief Add user defined handler for NMEA parser
  *
