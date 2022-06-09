@@ -1,14 +1,13 @@
 #include "sensors.h"
+#include "i2c.h"
 #include "config.h"
-#include "main.h"
-#include "rtos.h"
 
 
 
 
+//For gps data
 #define YEAR_BASE (2000) //date in GPS starts from 2000
 #define TIME_ZONE (-8)   //Canada Time
-
 
 //Function that describes what program will do when the GPS info is updated by the module
 /**
@@ -28,76 +27,75 @@ static void gps_event_handler(void *event_handler_arg, esp_event_base_t event_ba
         /* print information parsed from GPS statements */
 		if ((gps->tim.hour) + TIME_ZONE < 0)
 			gps->tim.hour = gps->tim.hour + 24;
+        
+        if ((gps->fix)== GPS_FIX_GPS){
+            gpio_set_level(blue_led, 1);
+        } else{
+            gpio_set_level(blue_led, 0);
+        }
 
-        ESP_LOGI(TAG, " %d:%d:%d => \r\n"
+        /*ESP_LOGI(TAG, " %d:%d:%d => \r\n"
 				 "\t\t\t\t\t\tsatellites in use   = %d\r\n"
                  "\t\t\t\t\t\tlatitude   = %.05f°N\r\n"
                  "\t\t\t\t\t\tlongitude = %.05f°E\r\n"
                  "\t\t\t\t\t\taltitude   = %.02fm\r\n",
                  gps->tim.hour + TIME_ZONE, gps->tim.minute, gps->tim.second,
-                 gps->sats_in_use, gps->latitude, gps->longitude, gps->altitude);
+                 gps->sats_in_use, gps->latitude, gps->longitude, gps->altitude); */
         break;
     case GPS_UNKNOWN:
         /* print unknown statements */
-        //ESP_LOGW(TAG, "Unknown statement:%s", (char *)event_data);
+       /* ESP_LOGW(TAG, "Unknown statement:%s", (char *)event_data); */
         break;
     default:
         break;
     }
 }
 
+//Pass nmea handle to handler which then enters the event handler loop
 void gps_handler_call(nmea_parser_handle_t nmea_hdl)
 {
 nmea_parser_add_handler(nmea_hdl, gps_event_handler, NULL);	
 }
 
+//To be filled
 void accelerometer_run()
 {
     
 }
 
+//All the work gets done in gps_event_handler, this just adds a delay
 void GPS_run()
 {   
 vTaskDelay(10000 / portTICK_PERIOD_MS);
 }
 
-void compass_run(i2c_cmd_handle_t cmd)
+//Pull raw xyz magnetic data from compass for sending to pi
+void compass_run()
 {
-	//Set active registert to "Data Output X MSB Register"
-	cmd = i2c_cmd_link_create();
-	i2c_master_start(cmd);
-	i2c_master_write_byte(cmd, (I2C_ADDRESS << 1) | I2C_MASTER_WRITE, 1);
-	i2c_master_write_byte(cmd, 0x03, 1); //0x03 = "Data Output X MSB Register"
-	i2c_master_stop(cmd);
-	i2c_master_cmd_begin(I2C_NUM_1, cmd, 1000/portTICK_PERIOD_MS);
-	i2c_cmd_link_delete(cmd);
+    i2c_yoink(mag, MAG_STATUS_REG, &status_reg, MAG_REG_SIZE); //Copy contents of status reg for comparison
+    if (status_reg & 0x03){ //Look for an update
+        printf("Data available...collecting\n");
+        gpio_set_level(green_led, 1);
+    } else {
+        printf("No new data available");
+        gpio_set_level(green_led, 0);
+    }
+    i2c_yoink(mag, MAG_OUT_X_L, &magx1, MAG_REG_SIZE); //Pull XYZ data
+    i2c_yoink(mag, MAG_OUT_X_H, &magx2, MAG_REG_SIZE);
+    i2c_yoink(mag, MAG_OUT_Y_L, &magy1, MAG_REG_SIZE);
+    i2c_yoink(mag, MAG_OUT_Y_H, &magy2, MAG_REG_SIZE);
+    i2c_yoink(mag, MAG_OUT_Z_L, &magz1, MAG_REG_SIZE);
+    i2c_yoink(mag, MAG_OUT_Z_H, &magz2, MAG_REG_SIZE);
+    int16_t magx = ((magx2 << 8) | magx1); //Return raw values
+    int16_t magy = ((magy2 << 8) | magy1);
+    int16_t magz = ((magz2 << 8) | magz1);
 
-	//Read values for X, Y and Z
-	cmd = i2c_cmd_link_create();
-	i2c_master_start(cmd);
-	i2c_master_write_byte(cmd, (I2C_ADDRESS << 1) | I2C_MASTER_READ, 1);
-	i2c_master_read_byte(cmd, data,   0); //"Data Output X MSB Register"
-	i2c_master_read_byte(cmd, data+1, 0); //"Data Output X LSB Register"
-	i2c_master_read_byte(cmd, data+2, 0); //"Data Output Z MSB Register"
-	i2c_master_read_byte(cmd, data+3, 0); //"Data Output Z LSB Register"
-	i2c_master_read_byte(cmd, data+4, 0); //"Data Output Y MSB Register"
-	i2c_master_read_byte(cmd, data+5, 1); //"Data Output Y LSB Register "
-	i2c_master_stop(cmd);
-	i2c_master_cmd_begin(I2C_NUM_1, cmd, 1000/portTICK_PERIOD_MS);
-	i2c_cmd_link_delete(cmd);
+   // ESP_LOGI(tag, " mag-x: %d\tmag-y: %d\tmag-z:%d\n", magx, magy, magz);
+    vTaskDelay(10000/ portTICK_RATE_MS);
 
-	short x = data[0] << 8 | data[1];
-	short z = data[2] << 8 | data[3];
-	short y = data[4] << 8 | data[5];
-	int angle = atan2((double)y,(double)x) * (180 / 3.14159265) + 180; // angle in degrees
-    angle -= 92; //Calibration
-    if (angle > 359) angle -= 360;
-    if (angle < 0) angle += 360;
-	ESP_LOGE(tag, "angle: %d°, x: %duT, y: %duT, z: %duT", angle, x, y, z);
-	vTaskDelay(1000/portTICK_PERIOD_MS);
-	
 }
 
+//Pull raw lidar data
 void lidar_run()
 {
 	byte lidar_val1;
@@ -138,4 +136,5 @@ void lidar_run()
     i2c_yoink(LIDAR3,0x0F,&lidar_val1,1);
     i2c_yoink(LIDAR3,0x10,&lidar_val2,1);
     lidar3_dist = (lidar_val1 << 8) | lidar_val2;
+    vTaskDelay(10000/ portTICK_RATE_MS);
 }

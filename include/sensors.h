@@ -1,7 +1,7 @@
 #ifndef SENSORS
 #define SENSORS
 
-#include "rtos.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <driver/i2c.h>
@@ -13,32 +13,32 @@
 #include <math.h>
 #include "sdkconfig.h"
 #include "i2c.h"
+#include "config.h"
 
+//For testing on breadboard
+#define blue_led        GPIO_NUM_15
+#define green_led       GPIO_NUM_2
+
+//GPS Related
 #define PIN_SDA 21
 #define PIN_CLK 22
-#define I2C_ADDRESS 0x1e
 #undef ESP_ERROR_CHECK
 #define ESP_ERROR_CHECK(x)   do { esp_err_t rc = (x); if (rc != ESP_OK) { ESP_LOGE("err", "esp_err_t = %d", rc); assert(0 && #x);} } while(0);
-static char tag[] = "Compass: ";
-static const char *TAG = "GPS: ";
 
+//static const char *TAG = "GPS: ";
 nmea_parser_handle_t nmea_hdl;
 
-sensor_t LIDAR1 = {1,0x62,23};
-sensor_t LIDAR2 = {1,0x64,23};
-sensor_t LIDAR3 = {1,0x66,23};
-int lidar1_dist;
-int lidar2_dist;
-int lidar3_dist;
+//static char tag[] = "Compass: ";
 
-void GPSInit(void);
+
+
 
 void accelerometer_run(void);
-void GPS_run();
-void compass_run(i2c_cmd_handle_t);
-i2c_cmd_handle_t compass_config_run(void);
+void GPSInit(void);
 void gps_handler_call(nmea_parser_handle_t);
-void lidar_config();
-void lidar_run();
+void GPS_run(void);
+void lidar_run(void);
+void compass_run(void);
+
 
 #endif

@@ -1,72 +1,39 @@
-#include "sensors.h"
-#include "main.h"
+#include "config.h"
+extern sensor_t mag;
+extern byte mag_who_am_i;
+extern byte status_reg;
+extern byte magx1;
+extern byte magx2;
+extern byte magy1;
+extern byte magy2;
+extern byte magz1;
+extern byte magz2;
 
-i2c_cmd_handle_t compass_config_run(void)
+extern sensor_t LIDAR1;
+extern sensor_t LIDAR2;
+extern sensor_t LIDAR3;
+extern int lidar1_dist;
+extern int lidar2_dist;
+extern int lidar3_dist;
+
+//Compass Config
+void compass_config(void)
 {
-    ESP_LOGD(tag, ">> hmc5883l");
-	i2c_config_t conf;
-	conf.mode = I2C_MODE_MASTER;
-	conf.sda_io_num = PIN_SDA;
-	conf.scl_io_num = PIN_CLK;
-	conf.sda_pullup_en = GPIO_PULLUP_ENABLE;
-	conf.scl_pullup_en = GPIO_PULLUP_ENABLE;
-	conf.master.clk_speed = 100000;
-    // conf.clk_flags = 0;
-	ESP_ERROR_CHECK(i2c_param_config(I2C_NUM_1, &conf));
-	ESP_ERROR_CHECK(i2c_driver_install(I2C_NUM_1, I2C_MODE_MASTER, 0, 0, 0));
-
-	
-
-	i2c_cmd_handle_t cmd = i2c_cmd_link_create();
-	i2c_master_start(cmd);
-	i2c_master_write_byte(cmd, (I2C_ADDRESS << 1) | I2C_MASTER_WRITE, 1);
-	i2c_master_write_byte(cmd, 0x02, 1); // 0x02 = "Mode register"
-	i2c_master_write_byte(cmd, 0x00, 1); // 0x00 = "Continuous-Measurement Mode"
-	i2c_master_stop(cmd);
-	i2c_master_cmd_begin(I2C_NUM_1, cmd, 1000/portTICK_PERIOD_MS);
-	i2c_cmd_link_delete(cmd);
-
-	//Set value in "Configuration Register B"
-	cmd = i2c_cmd_link_create();
-	i2c_master_start(cmd);
-	i2c_master_write_byte(cmd, (I2C_ADDRESS << 1) | I2C_MASTER_WRITE, 1);
-	i2c_master_write_byte(cmd, 0x01, 1); // 0x01 = "Configuration Register B"
-	i2c_master_write_byte(cmd, 0x20, 1); // 0x20 = default Gain setting
-	i2c_master_stop(cmd);
-	i2c_master_cmd_begin(I2C_NUM_1, cmd, 1000/portTICK_PERIOD_MS);
-	i2c_cmd_link_delete(cmd);
-
-	//Set active register to "Identification Register A"
-	cmd = i2c_cmd_link_create();
-	ESP_ERROR_CHECK(i2c_master_start(cmd));
-	ESP_ERROR_CHECK(i2c_master_write_byte(cmd, (I2C_ADDRESS << 1) | I2C_MASTER_WRITE, 1));
-	ESP_ERROR_CHECK(i2c_master_write_byte(cmd, 10, 1)); //10 = 0x0A = "Identification Register A"
-	ESP_ERROR_CHECK(i2c_master_stop(cmd));
-	ESP_ERROR_CHECK(i2c_master_cmd_begin(I2C_NUM_1, cmd, 100/portTICK_PERIOD_MS));
-	i2c_cmd_link_delete(cmd);
-
-	//Get data from Identification Register A, B and C
-	cmd = i2c_cmd_link_create();
-	ESP_ERROR_CHECK(i2c_master_start(cmd));
-	ESP_ERROR_CHECK(i2c_master_write_byte(cmd, (I2C_ADDRESS << 1) | I2C_MASTER_READ, 1));
-	i2c_master_read_byte(cmd, data,   0);
-	i2c_master_read_byte(cmd, data+1, 0);
-	i2c_master_read_byte(cmd, data+2, 1);
-	ESP_ERROR_CHECK(i2c_master_stop(cmd));
-	ESP_ERROR_CHECK(i2c_master_cmd_begin(I2C_NUM_1, cmd, 100/portTICK_PERIOD_MS));
-	i2c_cmd_link_delete(cmd);
-
-    return cmd;
+    i2c_yeet(mag, MAG_CTRL_REG2, 0x00, MAG_REG_SIZE);
+    i2c_yeet(mag, MAG_CTRL_REG1, 0x54, MAG_REG_SIZE); //Reg config
+    i2c_yeet(mag, MAG_CTRL_REG3, 0x00, MAG_REG_SIZE);
+    i2c_yeet(mag, MAG_CTRL_REG4, 0x00, MAG_REG_SIZE);
+    i2c_yeet(mag, MAG_CTRL_REG5, 0x00, MAG_REG_SIZE);
+    i2c_yoink(mag, MAG_WHO_AM_I_REG, &mag_who_am_i, MAG_REG_SIZE);
 }
-
-void lidar_config()
+//Lidar Config
+void lidar_config(void)
 {
-	i2c_yeet(LIDAR1,0x18,(byte)8,1);                  //switches lidar2's address from default to 0x64 by reading it's 16 bit serial number into registers 0x18 & 0x19 etc.
+    i2c_yeet(LIDAR1,0x18,(byte)8,1);                  //switches lidar2's address from default to 0x64 by reading it's 16 bit serial number into registers 0x18 & 0x19 etc.
     i2c_yeet(LIDAR1,0x19,(byte)38,1);
     i2c_yeet(LIDAR1,0x1a,(LIDAR2.addr<<1),1);
     i2c_yeet(LIDAR1,0x1e,0x10,1);
     i2c_yeet(LIDAR2,0x1e,0x18,1);
-
 	i2c_yeet(LIDAR1,0x18,(byte)8,1);                  //switches lidar3's address from default to 0x66 by reading it's 16 bit serial number into registers 0x18 & 0x19 etc.
     i2c_yeet(LIDAR1,0x19,(byte)34,1);
     i2c_yeet(LIDAR1,0x1a,(LIDAR3.addr<<1),1);

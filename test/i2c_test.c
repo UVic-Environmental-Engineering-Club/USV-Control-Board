@@ -7,7 +7,7 @@
 #define ACC_GYR_PWRMGM_REG          0x6B
 #define ACC_GYR_NUMREG              1
 
-#include "i2c.h"
+
 
 /*void app_main() 
 {
