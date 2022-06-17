@@ -40,6 +40,7 @@ static void gps_event_handler(void *event_handler_arg, esp_event_base_t event_ba
     case GPS_UNKNOWN:
         /* print unknown statements */
         //ESP_LOGW(TAG, "Unknown statement:%s", (char *)event_data);
+        //ESP_LOGW(TAG, "Unknown statement:%s", (char *)event_data); 
         break;
     default:
         break;
@@ -51,6 +52,13 @@ void gps_handler_call(nmea_parser_handle_t nmea_hdl)
 nmea_parser_add_handler(nmea_hdl, gps_event_handler, NULL);	
 }
 
+//All the work gets done in gps_event_handler, this just adds a delay
+void GPS_run()
+{   
+vTaskDelay(1000 / portTICK_PERIOD_MS);
+}
+
+//To be filled
 void accelerometer_run()
 {
     
@@ -96,6 +104,35 @@ void compass_run(i2c_cmd_handle_t cmd)
 	ESP_LOGE(tag, "angle: %d°, x: %duT, y: %duT, z: %duT", angle, x, y, z);
 	vTaskDelay(1000/portTICK_PERIOD_MS);
 	
+    const char magtag[] = "Magnetometer: ";
+    byte status_reg = 0;
+    byte magx1 = 0;
+    byte magx2 = 0;
+    byte magy1 = 0;
+    byte magy2 = 0;
+    byte magz1 = 0;
+    byte magz2 = 0;
+
+    i2c_yoink(mag, MAG_STATUS_REG, &status_reg, MAG_REG_SIZE); //Copy contents of status reg for comparison
+    if (status_reg & 0x03){ //Look for an update
+        printf("Data available...collecting\n");
+    } else {
+        printf("No new data available");
+    }
+
+    i2c_yoink(mag, MAG_OUT_X_L, &magx1, MAG_REG_SIZE); //Pull XYZ data
+    i2c_yoink(mag, MAG_OUT_X_H, &magx2, MAG_REG_SIZE);
+    i2c_yoink(mag, MAG_OUT_Y_L, &magy1, MAG_REG_SIZE);
+    i2c_yoink(mag, MAG_OUT_Y_H, &magy2, MAG_REG_SIZE);
+    i2c_yoink(mag, MAG_OUT_Z_L, &magz1, MAG_REG_SIZE);
+    i2c_yoink(mag, MAG_OUT_Z_H, &magz2, MAG_REG_SIZE);
+    int16_t magx = ((magx2 << 8) | magx1); //Return raw values
+    int16_t magy = ((magy2 << 8) | magy1);
+    int16_t magz = ((magz2 << 8) | magz1);
+
+    ESP_LOGI(magtag, " mag-x: %d\tmag-y: %d\tmag-z:%d\n", magx, magy, magz);
+    vTaskDelay(1000/ portTICK_RATE_MS);
+
 }
 
 void lidar_run()

@@ -66,11 +66,15 @@ void accelerometer_PRIVATETASK(void* params)
     TickType_t runPeriod = ACCEL_TASK_RUN_PERIOD / portTICK_PERIOD_MS;
 
     lastRunTime = xTaskGetTickCount();
+    compass_config(mag);
+    lidar_config(LIDAR1, LIDAR2, LIDAR3);
 
     while(1)
     {
         vTaskDelayUntil(&lastRunTime, runPeriod);
         accelerometer_run();
+        compass_run(mag);
+        lidar_run(LIDAR1, LIDAR2, LIDAR3);
     }
 }
 
