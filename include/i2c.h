@@ -1,3 +1,5 @@
+#ifndef I2CDRIVER
+#define I2CDRIVER
 #include "driver/i2c.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -25,3 +27,5 @@ typedef struct sensor_t
 esp_err_t i2c_init(void);
 esp_err_t i2c_yoink(sensor_t sensor, i2c_register_t i2c_register, byte* data, size_t len);
 esp_err_t i2c_yeet(sensor_t sensor, i2c_register_t i2c_register, byte data, size_t len);
+
+#endif

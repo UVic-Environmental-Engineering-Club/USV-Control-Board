@@ -1,8 +1,8 @@
 #ifndef MAIN
 #define MAIN
 
+#include "i2c.h"
 #include "rtos.h"
-uint8_t data[6]; //Store data values from compass
 
 void app_main(void);
 

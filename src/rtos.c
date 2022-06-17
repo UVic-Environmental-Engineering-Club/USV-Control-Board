@@ -5,20 +5,12 @@ xTaskHandle UART_task;
 xTaskHandle I2C_task;
 xTaskHandle motorControl_task;
 xTaskHandle GPS_task;
-xTaskHandle accelerometer_task;
-xTaskHandle compass_task;
-xTaskHandle lidar_task;
-
-
 
 void RTOSInit(void)
 {
     xTaskCreatePinnedToCore(UART_PRIVATETASK, "UART", 10000, NULL, 1, &UART_task, 1);
     xTaskCreatePinnedToCore(I2C_PRIVATETASK, "I2C", 10000, NULL, 1, &I2C_task, 1);
-    xTaskCreatePinnedToCore(accelerometer_PRIVATETASK, "accelerometer", 10000, NULL, 0, &accelerometer_task, 0);
     xTaskCreatePinnedToCore(motorControl_PRIVATETASK, "motor control", 10000, NULL, 0, &motorControl_task, 0);
-    xTaskCreatePinnedToCore(compass_PRIVATETASK, "compass", 10000, NULL, 0, &GPS_task, 0);
-    xTaskCreatePinnedToCore(lidar_PRIVATETASK, "lidar", 10000, NULL, 0, &lidar_task, 0);
     GPS_Init();
 }
 
@@ -53,26 +45,17 @@ void I2C_PRIVATETASK(void* params)
 
     lastRunTime = xTaskGetTickCount();
 
-    while(1)
-    {
-        vTaskDelayUntil(&lastRunTime, runPeriod);
-        I2C_run();
-    }
-}
+    sensor_t mag = {MAG_ID, MAG_ADDR, MAG_NUMREG};
+    sensor_t LIDAR1 = {1,0x62,23};
+    sensor_t LIDAR2 = {1,0x64,23};
+    sensor_t LIDAR3 = {1,0x66,23};
 
-void accelerometer_PRIVATETASK(void* params)
-{
-    TickType_t lastRunTime;
-    TickType_t runPeriod = ACCEL_TASK_RUN_PERIOD / portTICK_PERIOD_MS;
-
-    lastRunTime = xTaskGetTickCount();
     compass_config(mag);
     lidar_config(LIDAR1, LIDAR2, LIDAR3);
 
     while(1)
     {
         vTaskDelayUntil(&lastRunTime, runPeriod);
-        accelerometer_run();
         compass_run(mag);
         lidar_run(LIDAR1, LIDAR2, LIDAR3);
     }
@@ -90,35 +73,6 @@ void GPS_PRIVATETASK(void* params)
     {
         vTaskDelayUntil(&lastRunTime, runPeriod);
         GPS_run();
-    }
-}
-
-void compass_PRIVATETASK(void* params)
-{
-    TickType_t lastRunTime;
-    TickType_t runPeriod = COMPASS_TASK_RUN_PERIOD / portTICK_PERIOD_MS;
-
-    lastRunTime = xTaskGetTickCount();
-    i2c_cmd_handle_t cmdhandle = compass_config_run();
-    
-    while(1)
-    {
-        vTaskDelayUntil(&lastRunTime, runPeriod);
-        compass_run(cmdhandle);
-    }
-}
-
-void lidar_PRIVATETASK(void* params)
-{
-    TickType_t lastRunTime;
-    TickType_t runPeriod = COMPASS_TASK_RUN_PERIOD / portTICK_PERIOD_MS;
-
-    lastRunTime = xTaskGetTickCount();
-    
-    while(1)
-    {
-        vTaskDelayUntil(&lastRunTime, runPeriod);
-        lidar_run();
     }
 }
 

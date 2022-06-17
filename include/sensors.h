@@ -1,7 +1,7 @@
 #ifndef SENSORS
 #define SENSORS
 
-#include "rtos.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <driver/i2c.h>
@@ -14,31 +14,53 @@
 #include "sdkconfig.h"
 #include "i2c.h"
 
+//MAGNETOMETER Related
+#define MAG_ID                      1
+#define MAG_ADDR                    0x1C
+#define MAG_REG_SIZE                1
+#define MAG_WHO_AM_I_REG            0x0F
+#define MAG_CTRL_REG1               0x20
+#define MAG_CTRL_REG2               0x21
+#define MAG_CTRL_REG3               0x22    
+#define MAG_CTRL_REG4               0x23
+#define MAG_CTRL_REG5               0x24
+#define MAG_STATUS_REG              0x27 
+#define MAG_OUT_X_L                 0x28
+#define MAG_OUT_X_H                 0x29
+#define MAG_OUT_Y_L                 0x2A
+#define MAG_OUT_Y_H                 0x2B
+#define MAG_OUT_Z_L                 0x2C
+#define MAG_OUT_Z_H                 0x2D           
+#define MAG_NUMREG                  1
+//GPS Related
 #define PIN_SDA 21
 #define PIN_CLK 22
-#define I2C_ADDRESS 0x1e
 #undef ESP_ERROR_CHECK
 #define ESP_ERROR_CHECK(x)   do { esp_err_t rc = (x); if (rc != ESP_OK) { ESP_LOGE("err", "esp_err_t = %d", rc); assert(0 && #x);} } while(0);
-static char tag[] = "Compass: ";
-static const char *TAG = "GPS: ";
+
+void accelerometer_run(void);
+void GPSInit(void);
+void gps_handler_call(nmea_parser_handle_t);
+void GPS_run(void);
+void compass_config(sensor_t);
+void lidar_config(sensor_t, sensor_t, sensor_t);
+void lidar_run(sensor_t, sensor_t, sensor_t);
+void compass_run(sensor_t);
 
 nmea_parser_handle_t nmea_hdl;
 
-sensor_t LIDAR1 = {1,0x62,23};
-sensor_t LIDAR2 = {1,0x64,23};
-sensor_t LIDAR3 = {1,0x66,23};
-int lidar1_dist;
-int lidar2_dist;
-int lidar3_dist;
+static const char *TAG = "GPS: ";
 
-void GPSInit(void);
 
-void accelerometer_run(void);
-void GPS_run();
-void compass_run(i2c_cmd_handle_t);
-i2c_cmd_handle_t compass_config_run(void);
-void gps_handler_call(nmea_parser_handle_t);
-void lidar_config();
-void lidar_run();
+
+
+
+
+
+
+
+
+
+
 
 #endif
