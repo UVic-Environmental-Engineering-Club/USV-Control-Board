@@ -36,7 +36,7 @@ static void gps_event_handler(void *event_handler_arg, esp_event_base_t event_ba
         break;
     case GPS_UNKNOWN:
         /* print unknown statements */
-        ESP_LOGW(TAG, "Unknown statement:%s", (char *)event_data); 
+        //ESP_LOGW(TAG, "Unknown statement:%s", (char *)event_data); 
         break;
     default:
         break;
@@ -52,7 +52,7 @@ nmea_parser_add_handler(nmea_hdl, gps_event_handler, NULL);
 //All the work gets done in gps_event_handler, this just adds a delay
 void GPS_run()
 {   
-vTaskDelay(10000 / portTICK_PERIOD_MS);
+vTaskDelay(1000 / portTICK_PERIOD_MS);
 }
 
 //To be filled
@@ -79,7 +79,7 @@ void lidar_config(sensor_t LIDAR1, sensor_t LIDAR2, sensor_t LIDAR3)
     i2c_yeet(LIDAR1,0x1a,(LIDAR2.addr<<1),1);
     i2c_yeet(LIDAR1,0x1e,0x10,1);
     i2c_yeet(LIDAR2,0x1e,0x18,1);
-	i2c_yeet(LIDAR1,0x18,(byte)8,1);                  //switches lidar3's address from default to 0x66 by reading it's 16 bit serial number into registers 0x18 & 0x19 etc.
+	  i2c_yeet(LIDAR1,0x18,(byte)8,1);                  //switches lidar3's address from default to 0x66 by reading it's 16 bit serial number into registers 0x18 & 0x19 etc.
     i2c_yeet(LIDAR1,0x19,(byte)34,1);
     i2c_yeet(LIDAR1,0x1a,(LIDAR3.addr<<1),1);
     i2c_yeet(LIDAR1,0x1e,0x10,1);
@@ -116,8 +116,8 @@ void compass_run(sensor_t mag)
     int16_t magz = ((magz2 << 8) | magz1);
 
     ESP_LOGI(magtag, " mag-x: %d\tmag-y: %d\tmag-z:%d\n", magx, magy, magz);
-    vTaskDelay(10000/ portTICK_RATE_MS);
-
+  
+    vTaskDelay(1000/ portTICK_RATE_MS);
 }
 
 //Pull raw lidar data
@@ -126,8 +126,8 @@ void lidar_run(sensor_t LIDAR1, sensor_t LIDAR2, sensor_t LIDAR3)
 	byte lidar_val1;
 	byte lidar_val2;
 	int lidar1_dist = 0;
-    int lidar2_dist = 0;
-    int lidar3_dist = 0;
+  int lidar2_dist = 0;
+  int lidar3_dist = 0;
 
 	//LIDAR1 acquisition
     lidar_val1 = 0x01;
@@ -164,5 +164,5 @@ void lidar_run(sensor_t LIDAR1, sensor_t LIDAR2, sensor_t LIDAR3)
     i2c_yoink(LIDAR3,0x0F,&lidar_val1,1);
     i2c_yoink(LIDAR3,0x10,&lidar_val2,1);
     lidar3_dist = (lidar_val1 << 8) | lidar_val2;
-    vTaskDelay(10000/ portTICK_RATE_MS);
+    vTaskDelay(1000/ portTICK_RATE_MS);
 }

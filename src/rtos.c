@@ -1,12 +1,10 @@
 #include "rtos.h"
+#include "sensors.h"
 
 xTaskHandle UART_task;
 xTaskHandle I2C_task;
 xTaskHandle motorControl_task;
 xTaskHandle GPS_task;
-
-
-
 
 void RTOSInit(void)
 {
@@ -53,13 +51,13 @@ void I2C_PRIVATETASK(void* params)
     sensor_t LIDAR3 = {1,0x66,23};
 
     compass_config(mag);
-    //lidar_config(LIDAR1, LIDAR2, LIDAR3);
+    lidar_config(LIDAR1, LIDAR2, LIDAR3);
 
     while(1)
     {
         vTaskDelayUntil(&lastRunTime, runPeriod);
         compass_run(mag);
-        //lidar_run(LIDAR1, LIDAR2, LIDAR3);
+        lidar_run(LIDAR1, LIDAR2, LIDAR3);
     }
 }
 
