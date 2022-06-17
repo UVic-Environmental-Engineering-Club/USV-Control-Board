@@ -16,7 +16,7 @@
 #define UART_TASK_RUN_PERIOD 50
 #define I2C_TASK_RUN_PERIOD 50
 #define MOTOR_TASK_RUN_PERIOD 50
-#define GPS_TASK_RUN_PERIOD 10000
+#define GPS_TASK_RUN_PERIOD 50
 
 
 extern xTaskHandle UART_task;

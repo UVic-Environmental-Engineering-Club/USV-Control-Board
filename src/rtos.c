@@ -14,9 +14,6 @@ void RTOSInit(void)
     xTaskCreatePinnedToCore(I2C_PRIVATETASK, "I2C", 10000, NULL, 1, &I2C_task, 1);
     xTaskCreatePinnedToCore(motorControl_PRIVATETASK, "motor control", 10000, NULL, 0, &motorControl_task, 0);
     GPS_Init();
-    //LED testing
-    gpio_set_direction(blue_led, GPIO_MODE_OUTPUT);
-    gpio_set_direction(green_led, GPIO_MODE_OUTPUT);
 }
 
 void GPS_Init()
@@ -50,16 +47,19 @@ void I2C_PRIVATETASK(void* params)
 
     lastRunTime = xTaskGetTickCount();
 
-   
+    sensor_t mag = {MAG_ID, MAG_ADDR, MAG_NUMREG};
+    sensor_t LIDAR1 = {1,0x62,23};
+    sensor_t LIDAR2 = {1,0x64,23};
+    sensor_t LIDAR3 = {1,0x66,23};
 
-    compass_config();
-    lidar_config();
+    compass_config(mag);
+    //lidar_config(LIDAR1, LIDAR2, LIDAR3);
 
     while(1)
     {
         vTaskDelayUntil(&lastRunTime, runPeriod);
-        compass_run();
-        lidar_run();
+        compass_run(mag);
+        //lidar_run(LIDAR1, LIDAR2, LIDAR3);
     }
 }
 
