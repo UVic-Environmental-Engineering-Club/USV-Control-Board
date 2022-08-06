@@ -99,11 +99,11 @@ void compass_run(sensor_t mag)
     byte magz2 = 0;
 
     i2c_yoink(mag, MAG_STATUS_REG, &status_reg, MAG_REG_SIZE); //Copy contents of status reg for comparison
-    if (status_reg & 0x03){ //Look for an update
-        printf("Data available...collecting\n");
-    } else {
-        printf("No new data available");
-    }
+    // if (status_reg & 0x03){ //Look for an update
+    //     printf("Data available...collecting\n");
+    // } else {
+    //     printf("No new data available");
+    // }
 
     i2c_yoink(mag, MAG_OUT_X_L, &magx1, MAG_REG_SIZE); //Pull XYZ data
     i2c_yoink(mag, MAG_OUT_X_H, &magx2, MAG_REG_SIZE);
@@ -115,7 +115,7 @@ void compass_run(sensor_t mag)
     int16_t magy = ((magy2 << 8) | magy1);
     int16_t magz = ((magz2 << 8) | magz1);
 
-    ESP_LOGI(magtag, " mag-x: %d\tmag-y: %d\tmag-z:%d\n", magx, magy, magz);
+    // ESP_LOGI(magtag, " mag-x: %d\tmag-y: %d\tmag-z:%d\n", magx, magy, magz);
   
     vTaskDelay(1000/ portTICK_RATE_MS);
 }
