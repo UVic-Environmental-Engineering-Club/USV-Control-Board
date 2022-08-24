@@ -42,7 +42,7 @@ static void gps_event_handler(void *event_handler_arg, esp_event_base_t event_ba
     default:
         break;
     }
-    //vTaskDelay(100 / portTICK_PERIOD_MS);
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
 }
 
 //Pass nmea handle to handler which then enters the event handler loop
@@ -62,7 +62,6 @@ void accelerometer_run()
 //Pull raw xyz magnetic data from compass for sending to pi
 void compass_run()
 {
-    
     i2c_yoink(mag, MAG_STATUS_REG, &status_reg, MAG_REG_SIZE); //Copy contents of status reg for comparison
     if (status_reg & 0x03){ //Look for an update
         i2c_yoink(mag, MAG_OUT_X_L, &magx1, MAG_REG_SIZE); //Pull XYZ data
