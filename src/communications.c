@@ -1,5 +1,8 @@
 #include "communications.h"
 
+int mpr;
+int ran;
+
 int isno( char in ) { //Checks if an input char is a digit, returns that digit as an int. If not, returns 500. used in UART_run()
 
     if(in >= 48 && in <= 57){
@@ -26,16 +29,16 @@ void UART_run()
     sprintf(out,"GYR-%03d-%03d-%03d\n",gyrx,gyry,gyrz);                              
     uart_write_bytes(UART_NUM_0, (const char *) out, output_length); 
 
-    sprintf(out,"LID-%03d-%03d-%03d\n",lid1,lid2,lid3);                              
+    sprintf(out,"LID:%03d:%03d:%03d\n",lid1,lid2,lid3);                              
     uart_write_bytes(UART_NUM_0, (const char *) out, output_length);
 
     sprintf(out,"MAG:%05d:%05d:%05d\n",compass_x,compass_y,compass_z);                               
     uart_write_bytes(UART_NUM_0, (const char *) out, output_length);
 
-    sprintf(out,"RPM-%03d-%03d\n",rpm1,rpm2);                              
+    sprintf(out,"RPM:%03d:%03d\n",rpm1,rpm2);                              
     uart_write_bytes(UART_NUM_0, (const char *) out, output_length-4);
 
-    sprintf(out,"TMP-%03d-%03d\n",tmp1,tmp2);                              
+    sprintf(out,"TMP:%03d:%03d\n",tmp1,tmp2);                              
     uart_write_bytes(UART_NUM_0, (const char *) out, output_length-4);
 
     sprintf(out,"WET-%03d-%03d\n",wet1,wet2);                              

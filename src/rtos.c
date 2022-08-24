@@ -33,6 +33,12 @@ uint8_t num_satellites = 0;
 uint8_t fix_status_sats = 0; 
 uint8_t sats_view = 0;
 
+int rpm1,rpm2 = 0;
+int tmp1,tmp2 = 0;
+int wet1,wet2 = 0;
+int gyrx,gyry,gyrz = 0;
+int accelx,accely,accelz = 0;
+
 void RTOSInit(void)
 {
     xTaskCreatePinnedToCore(UART_PRIVATETASK, "UART", 10000, NULL, 0, &UART_task, 1);
