@@ -26,6 +26,7 @@ extern "C" {
 #define GPS_MAX_SATELLITES_IN_USE (12)
 #define GPS_MAX_SATELLITES_IN_VIEW (16)
 
+
 /**
  * @brief Declare of NMEA Parser Event base
  *
@@ -144,18 +145,17 @@ typedef void *nmea_parser_handle_t;
  * @brief Default configuration for NMEA Parser
  *
  */
-#define NMEA_PARSER_CONFIG_DEFAULT()       \
-    {                                      \
-        .uart = {                          \
-            .uart_port = UART_NUM_1,       \
-            .rx_pin = 16,                  \
-            .rx_pin = 3,                  \
-            .baud_rate = 9600,             \
-            .data_bits = UART_DATA_8_BITS, \
-            .parity = UART_PARITY_DISABLE, \
-            .stop_bits = UART_STOP_BITS_1, \
-            .event_queue_size = 16         \
-        }                                  \
+#define NMEA_PARSER_CONFIG_DEFAULT()              \
+    {                                             \
+        .uart = {                                 \
+            .uart_port = UART_NUM_1,              \
+            .rx_pin = CONFIG_NMEA_PARSER_UART_RXD,\
+            .baud_rate = 9600,                    \
+            .data_bits = UART_DATA_8_BITS,        \
+            .parity = UART_PARITY_DISABLE,        \
+            .stop_bits = UART_STOP_BITS_1,        \
+            .event_queue_size = 16               \
+        }                                         \
     }
 
 //Typedef indicating whether GPS info has been updated, or if an unknown statement detected

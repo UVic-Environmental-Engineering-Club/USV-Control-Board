@@ -11,6 +11,11 @@
         "memory": "c",
         "typeinfo": "c",
         "nmea_parser.h": "c",
-        "motorcontrol.h": "c"
+        "motorcontrol.h": "c",
+        "i2c.h": "c",
+        "stdio.h": "c",
+        "uart.h": "c",
+        "communications.h": "c",
+        "sensors.h": "c"
     }
 }

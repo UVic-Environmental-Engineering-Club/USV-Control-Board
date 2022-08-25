@@ -64,6 +64,8 @@ typedef struct {
     QueueHandle_t event_queue;                     /*!< UART event queue handle */
 } esp_gps_t;
 
+extern esp_gps_t *esp_gps;
+
 //Function that parses the latitude and longitude of the item in the statement
 /**
  * @brief parse latitude or longitude
@@ -398,7 +400,7 @@ static void nmea_parser_task_entry(void *arg)
             case UART_DATA:
                 break;
             case UART_FIFO_OVF:
-                ESP_LOGW(GPS_TAG, "HW FIFO Overflow");
+                //ESP_LOGW(GPS_TAG, "HW FIFO Overflow");
                 uart_flush(esp_gps->uart_port);
                 xQueueReset(esp_gps->event_queue);
                 break;
@@ -459,7 +461,7 @@ nmea_parser_handle_t nmea_parser_init(const nmea_parser_config_t *config)
     /* Set attributes */
     esp_gps->uart_port = config->uart.uart_port;
     esp_gps->all_statements &= 0xFE;
-    /* Install UART friver */
+    /* Install UART driver */
     uart_config_t uart_config = {
         .baud_rate = config->uart.baud_rate,
         .data_bits = config->uart.data_bits,
@@ -500,9 +502,9 @@ nmea_parser_handle_t nmea_parser_init(const nmea_parser_config_t *config)
     BaseType_t err = xTaskCreatePinnedToCore(
                          nmea_parser_task_entry,
                          "nmea_parser",
-                         CONFIG_NMEA_PARSER_TASK_STACK_SIZE,
+                         10000,
                          esp_gps,
-                         CONFIG_NMEA_PARSER_TASK_PRIORITY,
+                         0,
                          &esp_gps->tsk_hdl,0);
     if (err != pdTRUE) {
         ESP_LOGE(GPS_TAG, "create NMEA Parser task failed");
