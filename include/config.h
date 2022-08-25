@@ -25,5 +25,6 @@ void GPS_Init();
 void UARTInit(void);
 void compass_config();
 void lidar_config();
+void rudderInit(void);
 
 #endif

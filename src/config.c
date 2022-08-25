@@ -49,3 +49,8 @@ void lidar_config()
     i2c_yeet(LIDAR1,0x1e,0x10,1);
     i2c_yeet(LIDAR2,0x1e,0x18,1);
 }
+//Rudder initialization
+void rudderInit(void)
+{
+    PWM_config_init(LEDC_TIMER_20_BIT, 50, 0, LEDC_HIGH_SPEED_MODE, 12, 0);
+}

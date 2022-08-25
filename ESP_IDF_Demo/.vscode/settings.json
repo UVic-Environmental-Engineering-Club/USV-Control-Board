@@ -1,6 +1,0 @@
-{
-    "files.associations": {
-        "adc_common.h": "c",
-        "uart.h": "c"
-    }
-}

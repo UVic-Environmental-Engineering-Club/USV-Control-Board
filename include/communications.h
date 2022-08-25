@@ -9,4 +9,7 @@
 void UART_run(void);
 void I2C_run(void);
 
+extern int ran;
+extern int mpr;
+
 #endif

@@ -1,7 +1,7 @@
 #include "communications.h"
 
-int mpr;
-int ran;
+int mpr = 0; //Default motor speed of 0
+int ran = 90; //Default rudder angle of 90
 
 int isno( char in ) { //Checks if an input char is a digit, returns that digit as an int. If not, returns 500. used in UART_run()
 

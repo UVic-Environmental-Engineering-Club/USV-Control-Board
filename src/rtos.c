@@ -76,7 +76,7 @@ void I2C_PRIVATETASK(void* params)
     {
         vTaskDelayUntil(&lastRunTime, runPeriod);
         compass_run();
-        //lidar_run();
+        lidar_run();
     }
 }
 
@@ -86,6 +86,8 @@ void motorControl_PRIVATETASK(void* params)
     TickType_t runPeriod = MOTOR_TASK_RUN_PERIOD / portTICK_PERIOD_MS;
 
     lastRunTime = xTaskGetTickCount();
+
+    rudderInit();
 
     while(1)
     {
