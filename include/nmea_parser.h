@@ -1,16 +1,8 @@
-// Copyright 2015-2018 Espressif Systems (Shanghai) PTE LTD
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+/*
+ * SPDX-FileCopyrightText: 2015-2022 Espressif Systems (Shanghai) CO LTD
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 #pragma once
 
@@ -25,7 +17,6 @@ extern "C" {
 
 #define GPS_MAX_SATELLITES_IN_USE (12)
 #define GPS_MAX_SATELLITES_IN_VIEW (16)
-
 
 /**
  * @brief Declare of NMEA Parser Event base
@@ -92,10 +83,13 @@ typedef struct {
 typedef enum {
     STATEMENT_UNKNOWN = 0, /*!< Unknown statement */
     STATEMENT_GGA,         /*!< GGA */
+    STATEMENT_GSA,         /*!< GSA */
+    STATEMENT_RMC,         /*!< RMC */
+    STATEMENT_GSV,         /*!< GSV */
     STATEMENT_GLL,         /*!< GLL */
+    STATEMENT_VTG          /*!< VTG */
 } nmea_statement_t;
 
-//Typedef struct containing info that gets parsed from statement
 /**
  * @brief GPS object
  *
@@ -110,13 +104,17 @@ typedef struct {
     gps_fix_mode_t fix_mode;                                       /*!< Fix mode */
     uint8_t sats_id_in_use[GPS_MAX_SATELLITES_IN_USE];             /*!< ID list of satellite in use */
     float dop_h;                                                   /*!< Horizontal dilution of precision */
+    float dop_p;                                                   /*!< Position dilution of precision  */
+    float dop_v;                                                   /*!< Vertical dilution of precision  */
     uint8_t sats_in_view;                                          /*!< Number of satellites in view */
     gps_satellite_t sats_desc_in_view[GPS_MAX_SATELLITES_IN_VIEW]; /*!< Information of satellites in view */
     gps_date_t date;                                               /*!< Fix date */
     bool valid;                                                    /*!< GPS validity */
+    float speed;                                                   /*!< Ground speed, unit: m/s */
+    float cog;                                                     /*!< Course over ground */
+    float variation;                                               /*!< Magnetic variation */
 } gps_t;
 
-//Config struct for setting up and initializing UART
 /**
  * @brief Configuration of NMEA Parser
  *
@@ -133,14 +131,12 @@ typedef struct {
     } uart;                           /*!< UART specific configuration */
 } nmea_parser_config_t;
 
-//Declaration of handler
 /**
  * @brief NMEA Parser Handle
  *
  */
 typedef void *nmea_parser_handle_t;
 
-//Default configuration of UART
 /**
  * @brief Default configuration for NMEA Parser
  *
@@ -148,17 +144,16 @@ typedef void *nmea_parser_handle_t;
 #define NMEA_PARSER_CONFIG_DEFAULT()              \
     {                                             \
         .uart = {                                 \
-            .uart_port = UART_NUM_1,              \
-            .rx_pin = CONFIG_NMEA_PARSER_UART_RXD,\
+            .uart_port = UART_NUM_2,              \
+            .rx_pin = 16,\
             .baud_rate = 9600,                    \
             .data_bits = UART_DATA_8_BITS,        \
             .parity = UART_PARITY_DISABLE,        \
             .stop_bits = UART_STOP_BITS_1,        \
-            .event_queue_size = 16               \
+            .event_queue_size = 16                \
         }                                         \
     }
 
-//Typedef indicating whether GPS info has been updated, or if an unknown statement detected
 /**
  * @brief NMEA Parser Event ID
  *
@@ -168,7 +163,6 @@ typedef enum {
     GPS_UNKNOWN /*!< Unknown statements detected */
 } nmea_event_id_t;
 
-//Declaration of parser initialization (passing UART config to the program)
 /**
  * @brief Init NMEA Parser
  *
@@ -177,7 +171,14 @@ typedef enum {
  */
 nmea_parser_handle_t nmea_parser_init(const nmea_parser_config_t *config);
 
-//Declaration of handler initialization for NMEA statement interrupts
+/**
+ * @brief Deinit NMEA Parser
+ *
+ * @param nmea_hdl handle of NMEA parser
+ * @return esp_err_t ESP_OK on success, ESP_FAIL on error
+ */
+esp_err_t nmea_parser_deinit(nmea_parser_handle_t nmea_hdl);
+
 /**
  * @brief Add user defined handler for NMEA parser
  *
@@ -191,6 +192,18 @@ nmea_parser_handle_t nmea_parser_init(const nmea_parser_config_t *config);
  *  - Others: Fail
  */
 esp_err_t nmea_parser_add_handler(nmea_parser_handle_t nmea_hdl, esp_event_handler_t event_handler, void *handler_args);
+
+/**
+ * @brief Remove user defined handler for NMEA parser
+ *
+ * @param nmea_hdl handle of NMEA parser
+ * @param event_handler user defined event handler
+ * @return esp_err_t
+ *  - ESP_OK: Success
+ *  - ESP_ERR_INVALIG_ARG: Invalid combination of event base and event id
+ *  - Others: Fail
+ */
+esp_err_t nmea_parser_remove_handler(nmea_parser_handle_t nmea_hdl, esp_event_handler_t event_handler);
 
 #ifdef __cplusplus
 }

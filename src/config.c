@@ -4,8 +4,9 @@
 
 void UARTInit()
 {
-    const uart_port_t uart_num = UART_NUM_0;
-        uart_config_t uart_config = {                                //uart 0 config
+    const uart_port_t uart_num = UART_NUM_1;
+        uart_config_t uart_config = {  
+                                          //uart 0 config
             .baud_rate = 115200,
             .data_bits = UART_DATA_8_BITS,
             .parity = UART_PARITY_DISABLE,
